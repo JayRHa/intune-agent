@@ -2,12 +2,28 @@
 
 An AI-powered agent for querying and managing Microsoft Intune via natural language using Azure AI Foundry.
 
+## Two Implementation Approaches
+
+This project provides two implementation approaches:
+
+| Approach | File | Description |
+|----------|------|-------------|
+| **Direct OpenAI SDK** | `main.py` | Uses Azure OpenAI SDK directly with manual tool definitions |
+| **Microsoft Agent Framework** | `main_agent_framework.py` | Uses the new unified Agent Framework (successor to Semantic Kernel + AutoGen) |
+
+### Microsoft Agent Framework Benefits
+- Built-in `@ai_function` decorator for cleaner tool definitions
+- Native support for approval workflows on destructive actions
+- Graph-based workflows for multi-agent orchestration
+- Built-in OpenTelemetry integration for observability
+- Middleware support for intercepting agent actions
+
 ## Prerequisites
 
 - Azure subscription with an active Intune license
 - Azure AI Foundry resource with a deployed model (GPT-4o or GPT-4)
 - An app registration in Entra ID with Graph API permissions
-- Python 3.9+
+- Python 3.10+ (3.10+ required for Microsoft Agent Framework)
 
 ## Required Graph API Permissions
 
@@ -53,9 +69,14 @@ Your app registration needs these Microsoft Graph API permissions (Application p
 
 ## Usage
 
-Run the agent:
+### Option 1: Direct OpenAI SDK (Classic)
 ```bash
 python main.py
+```
+
+### Option 2: Microsoft Agent Framework (Recommended)
+```bash
+python main_agent_framework.py
 ```
 
 ### Example Queries
@@ -84,11 +105,18 @@ python main.py
 
 ```
 intune-agent-foundry/
-├── main.py           # Agent orchestration and conversation loop
-├── graph_helper.py   # Microsoft Graph API client
-├── intune_tools.py   # Function tools exposed to the agent
-├── requirements.txt  # Python dependencies
-├── setup.sh          # Azure app registration setup script
-├── .env.example      # Environment variable template
+├── main.py                    # Classic agent (direct OpenAI SDK)
+├── main_agent_framework.py    # Agent using Microsoft Agent Framework
+├── graph_helper.py            # Microsoft Graph API client
+├── intune_tools.py            # Function tools (classic approach)
+├── requirements.txt           # Python dependencies
+├── setup.sh                   # Azure app registration setup script
+├── .env.example               # Environment variable template
 └── README.md
 ```
+
+## Learn More
+
+- [Microsoft Agent Framework Overview](https://learn.microsoft.com/en-us/agent-framework/overview/agent-framework-overview)
+- [Agent Framework GitHub Repository](https://github.com/microsoft/agent-framework)
+- [Microsoft Graph API for Intune](https://learn.microsoft.com/en-us/graph/api/resources/intune-graph-overview)

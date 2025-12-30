@@ -2,3 +2,4 @@ openai
 azure-identity
 requests
 python-dotenv
+agent-framework --pre
