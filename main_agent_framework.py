@@ -85,7 +85,18 @@ def get_devices_by_os(
     operating_system: Annotated[str, "Operating system: Windows, iOS, Android, or macOS"]
 ) -> str:
     """Filter devices by operating system."""
-    result = intune_client.get_devices(f"operatingSystem eq '{operating_system}'")
+    # operating_system is supplied by the LLM (influenced by untrusted user
+    # input). Restrict to an allow-list so an attacker cannot smuggle arbitrary
+    # OData filter expressions by closing the quoted literal.
+    allowed_os = {"Windows", "iOS", "Android", "macOS", "Linux"}
+    canonical = {name.lower(): name for name in allowed_os}
+    normalized = canonical.get((operating_system or "").strip().lower())
+    if normalized is None:
+        return json.dumps({
+            "error": f"Unsupported operating system: {operating_system!r}. "
+                     f"Allowed values: {sorted(allowed_os)}"
+        })
+    result = intune_client.get_devices(f"operatingSystem eq '{normalized}'")
     devices = result.get('value', [])
     summary = [{
         'id': d.get('id'),
