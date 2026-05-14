@@ -88,8 +88,13 @@ OPENAI_ENDPOINT=$(grep "AZURE_OPENAI_ENDPOINT" "$ENV_FILE" 2>/dev/null | cut -d'
 OPENAI_KEY=$(grep "AZURE_OPENAI_API_KEY" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "")
 MODEL_NAME=$(grep "MODEL_DEPLOYMENT_NAME" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- || echo "gpt-4o")
 
-# Write .env file
-cat > "$ENV_FILE" << EOF
+# Write .env file with restrictive permissions (owner read/write only)
+# This prevents other local users from reading the Azure client secret and
+# Azure OpenAI API key. The umask is set before creating the file so the
+# secret is never briefly readable by other users.
+(
+    umask 077
+    cat > "$ENV_FILE" << EOF
 # Azure OpenAI Configuration
 AZURE_OPENAI_ENDPOINT=${OPENAI_ENDPOINT:-https://your-resource.openai.azure.com/}
 AZURE_OPENAI_API_KEY=${OPENAI_KEY:-your-api-key}
@@ -100,6 +105,10 @@ AZURE_TENANT_ID=$TENANT_ID
 AZURE_CLIENT_ID=$APP_ID
 AZURE_CLIENT_SECRET=$CLIENT_SECRET
 EOF
+)
+# Belt-and-braces: enforce 0600 in case the file already existed with
+# permissive bits from a prior run.
+chmod 600 "$ENV_FILE"
 
 echo ""
 echo "=== Setup Complete ==="

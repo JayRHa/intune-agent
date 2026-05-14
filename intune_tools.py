@@ -73,7 +73,21 @@ def get_devices_by_os(operating_system: str) -> str:
     :param operating_system: OS to filter (Windows, iOS, Android, macOS)
     :return: JSON with filtered device list
     """
-    result = client.get_devices(f"operatingSystem eq '{operating_system}'")
+    # The operating_system argument is supplied by the LLM, which is in turn
+    # influenced by untrusted user input. Restrict it to a known allow-list of
+    # supported platforms so an attacker can't smuggle arbitrary OData filter
+    # expressions (e.g. by closing the quoted literal). Graph would normally
+    # reject malformed filters, but defense-in-depth is cheap here.
+    allowed_os = {"Windows", "iOS", "Android", "macOS", "Linux"}
+    # Case-insensitive match, but return the canonical form to Graph.
+    canonical = {os_name.lower(): os_name for os_name in allowed_os}
+    normalized = canonical.get((operating_system or "").strip().lower())
+    if normalized is None:
+        return json.dumps({
+            "error": f"Unsupported operating system: {operating_system!r}. "
+                     f"Allowed values: {sorted(allowed_os)}"
+        })
+    result = client.get_devices(f"operatingSystem eq '{normalized}'")
     devices = result.get('value', [])
     summary = [{
         'id': d.get('id'),
