@@ -20,7 +20,7 @@ Observe. Automate. Report.
 
 ## What is this?
 
-This repository provides python-based agent for Microsoft Intune device management automation and monitoring.
+Python-based agent for Microsoft Intune device management automation and monitoring.
 
 > Browse the documentation below for setup notes, usage details, and project-specific context.
 
