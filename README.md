@@ -1,3 +1,18 @@
+<!-- repo-standard:start -->
+# Intune Agent
+
+Python-based agent for Microsoft Intune device management automation and monitoring.
+
+| Area | Stack | Visibility |
+| --- | --- | --- |
+| Endpoint Management | Python, Microsoft Graph | Public |
+
+**Repository:** `JayRHa/intune-agent`  
+**Topics:** `microsoft-intune`, `microsoft-graph`, `python`, `automation`, `endpoint-management`
+<!-- repo-standard:end -->
+
+---
+
 # Intune Agent with Azure AI Foundry
 
 An AI-powered agent for querying and managing Microsoft Intune via natural language using Azure AI Foundry.
