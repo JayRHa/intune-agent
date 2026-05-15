@@ -1,9 +1,9 @@
 <!-- unified-readme:start -->
 <div align="center">
 
-# Intune Agent
+# Intune Agent with Azure AI Foundry
 
-**Python-based agent for Microsoft Intune device management automation and monitoring.**
+**An AI-powered agent for querying and managing Microsoft Intune via natural language using Azure AI Foundry.**
 
 Observe. Automate. Report.
 
@@ -20,7 +20,7 @@ Observe. Automate. Report.
 
 ## What is this?
 
-Intune Agent supports Microsoft Intune and endpoint management workflows such as automation, troubleshooting, remediation, deployment, or reporting.
+Intune Agent with Azure AI Foundry supports Microsoft Intune and endpoint management workflows such as automation, troubleshooting, remediation, deployment, or reporting.
 
 ## Project Context
 
@@ -51,19 +51,10 @@ flowchart LR
    git clone https://github.com/JayRHa/IntuneAgent.git
    ```
 
-3. Continue with the project-specific documentation in the next section.
+3. Continue with the setup, usage, or workflow sections below.
 
 ---
 <!-- unified-readme:end -->
-
-<!-- project-documentation:start -->
-## Project Documentation
-
-The sections below contain the repository-specific setup, usage, and reference material for this project.
-
-# Intune Agent with Azure AI Foundry
-
-An AI-powered agent for querying and managing Microsoft Intune via natural language using Azure AI Foundry.
 
 ## Two Implementation Approaches
 
