@@ -9,6 +9,7 @@ import logging
 from azure.identity import ClientSecretCredential
 
 logger = logging.getLogger(__name__)
+GRAPH_REQUEST_TIMEOUT_SECONDS = 30
 
 
 class IntuneClient:
@@ -22,11 +23,20 @@ class IntuneClient:
         )
         self.base_url = 'https://graph.microsoft.com/v1.0'
         self.beta_url = 'https://graph.microsoft.com/beta'
+        self.request_timeout = float(
+            os.getenv('GRAPH_REQUEST_TIMEOUT_SECONDS', GRAPH_REQUEST_TIMEOUT_SECONDS)
+        )
 
     def _headers(self) -> dict:
         """Get authorization headers with a fresh token."""
         token = self.credential.get_token('https://graph.microsoft.com/.default')
         return {'Authorization': f'Bearer {token.token}'}
+
+    def _request(self, method: str, url: str, **kwargs) -> requests.Response:
+        """Send a Graph request with a bounded timeout."""
+        kwargs.setdefault('timeout', self.request_timeout)
+        kwargs.setdefault('headers', self._headers())
+        return requests.request(method, url, **kwargs)
 
     def _get_paginated(self, url: str, max_items: int = None) -> list:
         """
@@ -44,7 +54,7 @@ class IntuneClient:
 
         while url:
             logger.debug(f"Fetching: {url}")
-            response = requests.get(url, headers=headers)
+            response = self._request('GET', url, headers=headers)
 
             if not response.ok:
                 error_detail = response.json() if response.content else {}
@@ -85,7 +95,7 @@ class IntuneClient:
     def get_device_by_id(self, device_id: str) -> dict:
         """Get a specific device by ID."""
         url = f'{self.base_url}/deviceManagement/managedDevices/{device_id}'
-        response = requests.get(url, headers=self._headers())
+        response = self._request('GET', url)
         if not response.ok:
             raise Exception(f"Device not found: {response.status_code}")
         return response.json()
@@ -93,7 +103,7 @@ class IntuneClient:
     def sync_device(self, device_id: str) -> dict:
         """Trigger a sync for a specific device."""
         url = f'{self.base_url}/deviceManagement/managedDevices/{device_id}/syncDevice'
-        response = requests.post(url, headers=self._headers())
+        response = self._request('POST', url)
         if response.status_code == 204:
             return {"success": True}
         else:
@@ -103,7 +113,7 @@ class IntuneClient:
     def restart_device(self, device_id: str) -> dict:
         """Trigger a restart for a specific device."""
         url = f'{self.base_url}/deviceManagement/managedDevices/{device_id}/rebootNow'
-        response = requests.post(url, headers=self._headers())
+        response = self._request('POST', url)
         if response.status_code == 204:
             return {"success": True}
         else:
@@ -114,7 +124,7 @@ class IntuneClient:
         """Wipe a device. Use with caution!"""
         url = f'{self.base_url}/deviceManagement/managedDevices/{device_id}/wipe'
         body = {"keepEnrollmentData": keep_enrollment, "keepUserData": False}
-        response = requests.post(url, headers=self._headers(), json=body)
+        response = self._request('POST', url, json=body)
         if response.status_code == 204:
             return {"success": True}
         else:
@@ -124,7 +134,7 @@ class IntuneClient:
     def retire_device(self, device_id: str) -> dict:
         """Retire a device from Intune management."""
         url = f'{self.base_url}/deviceManagement/managedDevices/{device_id}/retire'
-        response = requests.post(url, headers=self._headers())
+        response = self._request('POST', url)
         if response.status_code == 204:
             return {"success": True}
         else:
@@ -254,7 +264,7 @@ class IntuneClient:
     def get_device_compliance_report(self) -> dict:
         """Get device compliance summary."""
         url = f'{self.base_url}/deviceManagement/deviceCompliancePolicyDeviceStateSummary'
-        response = requests.get(url, headers=self._headers())
+        response = self._request('GET', url)
         if not response.ok:
             raise Exception(f"Failed to get compliance report: {response.status_code}")
         return response.json()
